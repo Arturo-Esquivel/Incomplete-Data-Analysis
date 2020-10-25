@@ -66,8 +66,17 @@ ggplot(Disp,aes(x=value, fill=variable)) +
 
 
 
-```{r q3_b}
+```{r}
 fit <- lm(y2_M ~ y1)
+plot(fit$fitted.values, residuals(fit), xlab = "Fitted values", ylab = "Residuals")
+qqnorm(rstandard(fit), xlim = c(-3,3), ylim = c(-3,3))
+qqline(rstandard(fit),col=2)
+```
+
+We informally check the linearity and homoscedasticity assumptions looking at residuals and QQ-plot.
+
+
+```{r q3_b}
 sigmaest <- sigma(fit)
 pred <- fit$coefficients[1] + y1*fit$coefficients[2] + rnorm(500, 0, sigmaest)
 y2_SRI<-ifelse(is.na(y2_M)==TRUE,pred,y2_M)
@@ -127,6 +136,8 @@ Output<-data.frame(Mean=mcc,SE=secc,Dose_Correlation=CorbDose,Blood_P_Correlatio
 Output
 ```
 
+We have the estimate of the mean to be `r round(Output[1,1],2)` with a standard error of `r round(Output[1,2],2)`. The correlation with the dose is considerable (`r round(Output[1,3],2)`). Recovery time doesn't seem to be related to the blood pressure, since their correlations is `r roudn(Output[1,4],2)`.
+
 
 
 #### b)
@@ -148,13 +159,27 @@ recovtimeMI[is.na(databp$recovtime)==TRUE]
 ```
 
 
+Here we have the same estimate of the mean as before (`r round(Output2[1,1],2)`)
+given that we only inputted that same mean to the missing observations. The standard error is lower because of that (`r round(Output2[1,2],2)`). The correlation with the dose is a bit smaller (`r round(Output2[1,3],2)`). And the correlation with the blood pressure remains insignificant (`r roudn(Output2[1,4],2)`).
+
+
+
 
 #### c)
 
 Mean Regression Imputation
 
-```{r q4_c}
+```{r}
 fitRecovtime<-lm(recovtime ~ logdose + bloodp, data = databp)
+plot(fitRecovtime$fitted.values, residuals(fitRecovtime), xlab = "Fitted values", ylab = "Residuals")
+qqnorm(rstandard(fitRecovtime), xlim = c(-3,3), ylim = c(-3,3))
+qqline(rstandard(fitRecovtime),col=2)
+```
+
+We informally check the linearity and homoscedasticity assumptions looking at residuals and QQ-plot. There are few observations so is difficult to know for sure. But, looking at the QQ-plot the regression is probably not the best way to go.
+
+
+```{r q4_c}
 predri <- predict(fitRecovtime,newdata=databp)
 recovtimeMRI<-ifelse(is.na(databp$recovtime) == TRUE, predri, databp$recovtime)
 mri <- mean(recovtimeMRI)
