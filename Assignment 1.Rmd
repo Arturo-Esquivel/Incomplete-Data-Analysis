@@ -19,7 +19,7 @@ So, the probability of an observation with ALQ=Yes being missing is the same for
 
 #### b)
 
-The correct answer is (ii). When ALQ is MAR given gender the probability of an observation being missing changes for different gender values. Gender is assumed to be the only variable affecting the probability of missingness. If gender is adjusted for then the probability of missingness becomes completely at random and independent of what value ALQ takes.
+The correct answer is (ii). When ALQ is MAR given gender, the probability of an observation being missing changes for different gender values. Gender is assumed to be the only variable affecting the probability of missingness. If gender is adjusted for then the probability of missingness becomes completely at random and independent of what value ALQ takes.
 
 
 #### c)
@@ -73,7 +73,7 @@ qqnorm(rstandard(fit), xlim = c(-3,3), ylim = c(-3,3))
 qqline(rstandard(fit),col=2)
 ```
 
-We informally check the linearity and homoscedasticity assumptions looking at residuals and QQ-plot.
+We informally check the linearity and homoscedasticity assumptions looking at residuals and QQ-plot. 
 
 
 ```{r q3_b}
@@ -105,8 +105,18 @@ ggplot(Disp3,aes(x=value, fill=variable)) +
 
 #### d)
 
-```{r q3_d}
+```{r}
 fit2 <- lm(y2_M2 ~ y1)
+plot(fit2$fitted.values, residuals(fit2), xlab = "Fitted values", ylab = "Residuals")
+qqnorm(rstandard(fit2), xlim = c(-3,3), ylim = c(-3,3))
+qqline(rstandard(fit2),col=2)
+```
+
+
+We informally check the linearity and homoscedasticity assumptions looking at residuals and QQ-plot. 
+
+
+```{r q3_d}
 sigmaest2 <- sigma(fit2)
 pred2 <- fit2$coefficients[1] + y1*fit2$coefficients[2] + rnorm(500, 0, sigmaest2)
 y2_SRI2<-ifelse(is.na(y2_M2)==TRUE,pred,y2_M2)
@@ -136,7 +146,7 @@ Output<-data.frame(Mean=mcc,SE=secc,Dose_Correlation=CorbDose,Blood_P_Correlatio
 Output
 ```
 
-We have the estimate of the mean to be `r round(Output[1,1],2)` with a standard error of `r round(Output[1,2],2)`. The correlation with the dose is considerable (`r round(Output[1,3],2)`). Recovery time doesn't seem to be related to the blood pressure, since their correlations is `r roudn(Output[1,4],2)`.
+We have the estimate of the mean to be `r round(Output[1,1],2)` with a standard error of `r round(Output[1,2],2)`. The correlation with the dose is considerable (`r round(Output[1,3],2)`). Recovery time doesn't seem to be related to the blood pressure, since their correlations is `r round(Output[1,4],2)`.
 
 
 
@@ -160,7 +170,7 @@ recovtimeMI[is.na(databp$recovtime)==TRUE]
 
 
 Here we have the same estimate of the mean as before (`r round(Output2[1,1],2)`)
-given that we only inputted that same mean to the missing observations. The standard error is lower because of that (`r round(Output2[1,2],2)`). The correlation with the dose is a bit smaller (`r round(Output2[1,3],2)`). And the correlation with the blood pressure remains insignificant (`r roudn(Output2[1,4],2)`).
+given that we only inputted that same mean to the missing observations. The standard error is lower because of that (`r round(Output2[1,2],2)`). The correlation with the dose is a bit smaller (`r round(Output2[1,3],2)`). And the correlation with the blood pressure remains insignificant (`r round(Output2[1,4],2)`).
 
 
 
@@ -195,6 +205,8 @@ predri[is.na(databp$recovtime)==TRUE]
 ```
 
 
+Now we have an estimate for the mean of `r round(Output3[1,1],2)`. Since the inputted values are in a straight line, the standard error is lower than for the CCA (`r round(Output3[1,2],2)`). For the same reason, the correlation with the dose is higher (`r round(Output3[1,3],2)`). And the correlation with the blood pressure remains insignificant (`r round(Output3[1,4],2)`).
+
 
 #### d)
 
@@ -220,6 +232,8 @@ predsri[is.na(databp$recovtime)==TRUE]
 ```
 
 
+Now we have an estimate for the mean of `r round(Output4[1,1],2)`, which is higher than all others. Due to the stochastic component, the standard error is higher than (`r round(Output4[1,2],2)`). For the same reason as for RI, the correlation with the dose is higher (`r round(Output4[1,3],2)`). The correlation with the blood pressure remains insignificant (`r round(Output4[1,4],2)`).
+
 
 #### e)
 
@@ -238,19 +252,20 @@ mpmm <- mean(recovtimePMM)
 sepmm <- sd(recovtimePMM)/sqrt(length(recovtimePMM))
 CorbDosePMM<-cor(databp$logdose,recovtimePMM)
 CorbBPPMM<-cor(databp$bloodp,recovtimePMM)
-Output4<-data.frame(Mean=mpmm,SE=sepmm,Dose_Correlation=CorbDosePMM,Blood_P_Correlation=CorbBPPMM)
-Output4
+Output5<-data.frame(Mean=mpmm,SE=sepmm,Dose_Correlation=CorbDosePMM,Blood_P_Correlation=CorbBPPMM)
+Output5
 ```
 The inputted values were:
 ```{r}
 recovtimePMM[is.na(databp$recovtime)==TRUE]
 ```
 
+With this method we have an estimate for the mean of `r round(Output5[1,1],2)`. Since other observed values are used, the standard error is lower than for other methods (`r round(Output5[1,2],2)`). The correlation with the dose is `r round(Output5[1,3],2)`. The correlation with the blood pressure remains insignificant (`r round(Output5[1,4],2)`).
 
 
 #### f)
 
-It is less dependent on linearity assumptions. It is better at dealing with issues such as heteroscedasticity because it uses real values from other subjects and that helps to account for variance changes. 
+It is less dependent on linearity assumptions. It is better at dealing with issues such as heteroscedasticity because it uses real values from other subjects and that helps to account for variance changes. Finally, using only real values avoids problems like negative values.
 
 
 The main problem that I can think of for this method is that ita can happen that many predictions for missing values are closest to the same predicted value of the donor. That could cause for the same value to be inputted multiple times. So it may lead to biased estimations and of course to underestimation of the standard errors.
